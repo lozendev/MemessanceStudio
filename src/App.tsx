@@ -141,7 +141,7 @@ export default function App() {
           {/* Logo / Left */}
           <div className="flex flex-col items-start cursor-pointer group" onClick={() => scrollTo('hero')}>
             <div className="group-hover:opacity-80 transition-opacity">
-              <img src={`${import.meta.env.BASE_URL}LogoPNG.png`} alt="Meme" className="w-[100px] object-contain" />
+              <img src={`${import.meta.env.BASE_URL}LogoPNG.png`} alt="Meme" className="w-[67px] object-contain" />
             </div>
             <a href="https://www.lozen.dev" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.2em] opacity-40 uppercase group-hover:opacity-100 transition-opacity mt-1 hover:text-amber-300" onClick={(e) => e.stopPropagation()}>
               LOZENPRJKT#5
