@@ -201,10 +201,10 @@ export default function App() {
           loop 
           muted 
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-40 z-0"
+          className="absolute inset-0 w-full h-full object-cover opacity-60 z-0"
           src={`${import.meta.env.BASE_URL}herowebm.webm`}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black z-0 pointer-events-none" />
 
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto flex flex-col items-center">
           <h1 className="text-5xl md:text-7xl lg:text-8xl tracking-wider mb-8 drop-shadow-2xl">
@@ -247,10 +247,10 @@ export default function App() {
           loop 
           muted 
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-30 z-0"
+          className="absolute inset-0 w-full h-full object-cover opacity-50 z-0"
           src={`${import.meta.env.BASE_URL}aboutwebm.webm`}
         />
-        <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/40 to-black/90 z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/20 to-black/80 z-0 pointer-events-none" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full flex justify-end">
           <div className="w-full md:w-1/2 lg:w-5/12 text-right">
@@ -282,10 +282,10 @@ export default function App() {
           loop 
           muted 
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-40 z-0"
+          className="absolute inset-0 w-full h-full object-cover opacity-60 z-0"
           src={`${import.meta.env.BASE_URL}roadwebm.webm`}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80 z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 z-0 pointer-events-none" />
 
         <div className="relative z-10 text-center w-full max-w-4xl px-4 flex flex-col items-center h-full justify-start pt-32">
           <h2 className="text-5xl md:text-6xl lg:text-7xl tracking-wider mb-4 drop-shadow-lg">
@@ -349,10 +349,10 @@ export default function App() {
           loop 
           muted 
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-20 z-0 mix-blend-luminosity"
+          className="absolute inset-0 w-full h-full object-cover opacity-40 z-0 mix-blend-luminosity"
           src={`${import.meta.env.BASE_URL}featureswebm.webm`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0 pointer-events-none" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full flex-grow flex flex-col justify-center">
           <h2 className="text-4xl md:text-5xl lg:text-6xl tracking-wider mb-16 text-center">
