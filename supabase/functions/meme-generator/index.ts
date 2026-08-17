@@ -33,9 +33,9 @@ Deno.serve(async (req: Request) => {
 
     const pureBase64 = imageBase64.split(',')[1] || imageBase64;
 
-    console.log("Phase 1: Deep Vision Inspection with Gemini 2.5 Flash...");
+    console.log("Phase 1: Inspecting face with Gemini 2.5 Flash...");
 
-    // Phase 1: Extract a hyper-detailed portrait description optimised for Renaissance art generation
+    // Phase 1: Get a detailed description of the person's face
     const visionResponse = await fetchWithRetry(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
@@ -45,20 +45,15 @@ Deno.serve(async (req: Request) => {
           contents: [{
             parts: [
               {
-                text: `You are an expert art historian and portrait painter. Study this person's face very carefully.
-                
-Describe them in rich detail for a Renaissance portrait artist, covering:
-- Exact skin tone and texture (e.g. "warm olive complexion with subtle rose in the cheeks")
-- Eye shape, colour and expression (e.g. "deep-set almond eyes with dark amber irises")  
-- Nose shape (e.g. "aquiline nose", "broad nose with rounded tip")
-- Lips (e.g. "full lips with a pronounced cupid's bow")
-- Jaw and facial structure (e.g. "strong square jaw", "soft oval face")
-- Hair — colour, texture, length, style
-- Any distinctive features (beard, freckles, strong brow, high cheekbones, etc.)
-- Approximate age and apparent gender
-- Their emotional expression
+                text: `Describe this person's face in a short paragraph. Focus on:
+- Skin tone
+- Eye shape and colour
+- Nose and mouth shape
+- Hair colour and style
+- Approximate age and gender
+- Their expression
 
-Write only a single dense paragraph of pure description, no commentary, no preamble.`
+Write only a plain description paragraph, no commentary.`
               },
               { inline_data: { mime_type: "image/jpeg", data: pureBase64 } }
             ]
@@ -80,37 +75,34 @@ Write only a single dense paragraph of pure description, no commentary, no pream
     }
 
     console.log("Vision complete. Description:", personDescription);
-    console.log("Phase 2: Generating Renaissance Masterpiece via Pollinations.ai...");
+    console.log("Phase 2: Generating clown image via Pollinations.ai...");
 
-    // Phase 2: Build a masterful Renaissance prompt
+    // Phase 2: Build a detailed clown prompt based on the person's face
     const finalPrompt = [
-      // Subject — from Gemini's description
-      personDescription.trim(),
+      // The subject — their real features carry through
+      `A photorealistic portrait of a ${personDescription.trim()}`,
 
-      // Style anchors — specific to Da Vinci / High Renaissance
-      "Renaissance portrait painting in the style of Leonardo da Vinci",
-      "sfumato technique, soft smoky transitions between light and shadow",
-      "chiaroscuro lighting, single directional warm candlelight from upper left",
-      "oil on wood panel, visible fine brushstrokes, aged craquelure texture",
-      "three-quarter view portrait, neutral dark background transitioning to deep umber and olive shadow",
+      // The clown transformation
+      "transformed into a professional circus clown",
+      "bright white clown face paint covering the entire face",
+      "exaggerated red bulbous clown nose",
+      "large painted red smile extending far beyond the lips",
+      "thick black outlines around the eyes with dramatic arched painted eyebrows",
+      "colorful clown eye shadow, red circles painted on cheeks",
+      "wearing a oversized colorful polka-dot clown costume with big ruffled collar",
+      "wild colorful clown wig — bright orange or rainbow afro",
 
-      // Era-specific costume & setting
-      "wearing period 15th-century Italian Renaissance noble attire, rich fabric, subtle gold thread details",
-      "hands folded or resting in frame like a da Vinci subject",
-
-      // Quality boosters
-      "museum-quality masterpiece, photorealistic oil painting, extremely detailed, 8k resolution",
-      "sharp focus on eyes, realistic skin texture, subsurface scattering, anatomically precise face",
-      "National Gallery London, Louvre collection quality",
+      // Style & quality
+      "ultra photorealistic, studio portrait lighting, sharp focus",
+      "professional photography, 8k, hyper detailed",
+      "the person's original facial features are still recognisable beneath the clown makeup",
     ].join(", ");
 
     const randomSeed = Math.floor(Math.random() * 9999999);
     const encodedPrompt = encodeURIComponent(finalPrompt);
-
-    // Use flux-realism for best portrait fidelity, higher resolution
     const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&seed=${randomSeed}&width=768&height=960&nologo=true&enhance=true`;
 
-    console.log("Calling Pollinations with enhanced prompt...");
+    console.log("Calling Pollinations with clown prompt...");
     const pollinationResponse = await fetchWithRetry(pollinationsUrl, { method: "GET" });
 
     if (!pollinationResponse.ok) {
@@ -129,7 +121,7 @@ Write only a single dense paragraph of pure description, no commentary, no pream
     }
     const finalBase64 = btoa(generatedBase64);
 
-    console.log("Masterpiece Complete!");
+    console.log("Clown complete! Honk honk.");
 
     return new Response(JSON.stringify({
       success: true,

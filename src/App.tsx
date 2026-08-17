@@ -295,7 +295,7 @@ export default function App() {
                     <img src={`${import.meta.env.BASE_URL}LogoPNG.png`} alt="Meme" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity" />
                  </div>
                  <label htmlFor="file-upload" className="text-white/70 font-sans text-sm tracking-widest text-center px-8 cursor-pointer group-hover:text-white transition-colors">
-                    Upload image and Leonardo do his thing. <br/><br/><span className="text-amber-500/80 underline">Click to Browse</span>
+                    Upload your photo and get clowned. <br/><br/><span className="text-amber-500/80 underline">Click to Browse</span>
                  </label>
                  <input id="file-upload" type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                </>
@@ -307,14 +307,14 @@ export default function App() {
                     <img src={uploadedImage} alt="Original" className="w-full h-full object-cover filter grayscale blur-[2px]" />
                     <div className="absolute inset-0 border-t-4 border-amber-300 rounded-full animate-spin" style={{borderTopColor: 'transparent', borderBottomColor: '#fcd34d', animationDuration: '1s'}}></div>
                   </div>
-                  <p className="text-amber-300 font-vibes text-3xl mb-2">Summoning Da Vinci...</p>
-                  <p className="text-white/50 text-xs tracking-widest uppercase">Applying Renaissance Filter</p>
+                  <p className="text-amber-300 font-vibes text-3xl mb-2">Applying The Clown...</p>
+                  <p className="text-white/50 text-xs tracking-widest uppercase">Honk Honk 🤡</p>
                </div>
              )}
              
              {generateState === 'done' && (
                <div className="flex flex-col items-center justify-center h-full w-full relative group/result">
-                  <img src={uploadedImage || ''} alt="Renaissance result" className="absolute inset-0 w-full h-full object-cover sepia-[.8] contrast-125 brightness-90 filter" />
+                  <img src={uploadedImage || ''} alt="Clown result" className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/result:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-6 left-0 w-full flex justify-center gap-4 opacity-0 group-hover/result:opacity-100 transition-opacity duration-300 translate-y-4 group-hover/result:translate-y-0">
                     <button 
