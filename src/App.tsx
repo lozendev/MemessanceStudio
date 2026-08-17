@@ -226,13 +226,7 @@ export default function App() {
               <span className="relative z-10">View Chart</span>
               <div className="absolute inset-0 bg-white transform scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-in-out opacity-10"></div>
             </button>
-            <button 
-              onClick={() => window.open('https://www.x.com/lozendev', '_blank')}
-              className="relative px-8 py-4 bg-transparent border border-white/30 text-white uppercase tracking-widest text-sm backdrop-blur-sm overflow-hidden group hover:border-white transition-all duration-500 w-full sm:w-auto"
-            >
-              <span className="relative z-10">Follow X</span>
-              <div className="absolute inset-0 bg-white transform scale-x-0 origin-right group-hover:scale-x-100 transition-transform duration-500 ease-in-out opacity-10"></div>
-            </button>
+
           </div>
         </div>
       </section>
