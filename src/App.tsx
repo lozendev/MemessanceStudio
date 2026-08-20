@@ -17,10 +17,27 @@ const FlowyChar = ({ char }: { char: string }) => (
   <span className="font-vibes text-amber-300/90 text-[1.4em] leading-none inline-block align-baseline hover:scale-110 transition-transform duration-300 transform -translate-y-1">{char}</span>
 );
 
+const noseSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="redNose" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#ff9f9f" /><stop offset="40%" stop-color="#ff0000" /><stop offset="100%" stop-color="#900000" /></radialGradient><filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.4"/></filter></defs><circle cx="50" cy="50" r="45" fill="url(#redNose)" filter="url(#shadow)" /><ellipse cx="36" cy="36" rx="10" ry="6" fill="#ffffff" opacity="0.8" transform="rotate(-30 36 36)" /></svg>`;
+
+const wigSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200"><defs><filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.35"/></filter></defs><g filter="url(#shadow)"><path d="M50,120 C30,105 10,75 35,50 C55,30 85,35 95,55 C105,25 145,15 165,45 C185,15 225,25 235,55 C245,35 275,30 295,50 C320,75 300,105 280,120 C300,135 290,175 260,185 C230,195 210,175 200,155 C190,185 150,195 130,165 C110,195 70,185 60,155 C50,175 30,195 10,175 C-10,155 10,135 30,120 Z" fill="#ff3366" /><path d="M65,110 C50,95 30,70 50,45 C70,25 95,30 105,50 C115,20 150,10 170,40 C190,10 225,20 235,50 C245,30 270,25 290,45 C310,70 290,95 275,110" fill="#ff9900" /><path d="M85,100 C75,85 55,60 75,40 C95,20 115,25 125,45 C135,15 165,5 185,35 C205,5 235,15 245,45" fill="#ffcc00" /><path d="M105,90 C95,75 80,50 100,30 C120,10 135,15 145,35 C155,10 180,5 195,30" fill="#33cc66" /><path d="M125,80 C115,65 105,45 120,25 C135,10 150,15 160,35" fill="#3399ff" /></g></svg>`;
+
+const starSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,5 63,38 97,50 63,62 50,95 37,62 3,50 37,38" fill="#3399ff" /><circle cx="50" cy="50" r="12" fill="#ffffff" /></svg>`;
+
+const smileSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><path d="M 10,20 Q 100,95 190,20 Q 100,125 10,20 Z" fill="#ff3366" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" /></svg>`;
+
+const loadImage = (svgString: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = (err) => reject(err);
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+  });
+};
+
 const applyClownFilterHelper = (base64Image: string, coords: any): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       try {
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth;
@@ -38,7 +55,15 @@ const applyClownFilterHelper = (base64Image: string, coords: any): Promise<strin
         const getX = (val: number) => (val / 100) * w;
         const getY = (val: number) => (val / 100) * h;
         
-        // 1. Draw Wig (Rainbow Afro) on top of the head
+        // Load all SVG assets in parallel
+        const [noseImg, wigImg, starImg, smileImg] = await Promise.all([
+          loadImage(noseSvg),
+          loadImage(wigSvg),
+          loadImage(starSvg),
+          loadImage(smileSvg)
+        ]);
+
+        // 1. Draw Wig (Afro) on top of the head
         if (coords.face) {
           const faceX = getX(coords.face.x);
           const faceY = getY(coords.face.y);
@@ -46,114 +71,79 @@ const applyClownFilterHelper = (base64Image: string, coords: any): Promise<strin
           const faceH = (coords.face.height / 100) * h;
           const faceSize = Math.max(faceW, faceH);
 
-          const colors = ['#FF4136', '#FF851B', '#FFDC00', '#2ECC40', '#0074D9', '#B10DC9'];
-          ctx.globalAlpha = 0.85;
-          const wigRadius = faceSize * 0.35;
-          const numCircles = 12;
-          for (let i = 0; i < numCircles; i++) {
-            const angle = (i / numCircles) * Math.PI - Math.PI; // Arch over the head
-            const offsetDist = faceSize * 0.55;
-            const cx = faceX + Math.cos(angle) * offsetDist;
-            const cy = faceY - faceH * 0.35 + Math.sin(angle) * offsetDist * 0.7;
-            
-            ctx.fillStyle = colors[i % colors.length];
-            ctx.beginPath();
-            ctx.arc(cx, cy, wigRadius, 0, 2 * Math.PI);
-            ctx.fill();
-          }
-          ctx.globalAlpha = 1.0;
+          // Position wig above the detected face box
+          const wigW = faceSize * 2.2;
+          const wigH = wigW * (200 / 300); // aspect ratio of wigSvg
+          const wigX = faceX - wigW / 2;
+          const wigY = faceY - faceH * 0.7 - wigH * 0.45;
+
+          ctx.drawImage(wigImg, wigX, wigY, wigW, wigH);
         }
 
-        // 2. Rosy Cheeks
+        // 2. Rosy Cheeks (soft radial gradients)
         if (coords.nose) {
           const noseX = getX(coords.nose.x);
           const noseY = getY(coords.nose.y);
           const faceW = coords.face ? (coords.face.width / 100) * w : w * 0.3;
-          const cheekOffset = faceW * 0.25;
-          const cheekR = faceW * 0.1;
+          const cheekOffset = faceW * 0.28;
+          const cheekR = faceW * 0.16;
 
-          ctx.globalAlpha = 0.45;
-          ctx.fillStyle = '#FF4136';
-          
-          ctx.beginPath();
-          ctx.arc(noseX - cheekOffset, noseY + cheekR * 0.3, cheekR, 0, 2 * Math.PI);
-          ctx.fill();
+          const drawCheek = (cx: number, cy: number) => {
+            const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, cheekR);
+            grad.addColorStop(0, 'rgba(255, 51, 102, 0.45)');
+            grad.addColorStop(1, 'rgba(255, 51, 102, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, cheekR, 0, 2 * Math.PI);
+            ctx.fill();
+          };
 
-          ctx.beginPath();
-          ctx.arc(noseX + cheekOffset, noseY + cheekR * 0.3, cheekR, 0, 2 * Math.PI);
-          ctx.fill();
-          ctx.globalAlpha = 1.0;
+          drawCheek(noseX - cheekOffset, noseY + cheekR * 0.1);
+          drawCheek(noseX + cheekOffset, noseY + cheekR * 0.1);
         }
 
-        // 3. Exaggerated Red Clown Smile
+        // 3. Draw Mouth (Exaggerated smile)
         if (coords.mouth) {
           const mX = getX(coords.mouth.x);
           const mY = getY(coords.mouth.y);
           const mW = (coords.mouth.width / 100) * w;
           const mH = (coords.mouth.height / 100) * h;
 
-          ctx.strokeStyle = '#FF4136';
-          ctx.lineWidth = Math.max(5, mW * 0.15);
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
+          const smileW = mW * 2.1;
+          const smileH = smileW * (100 / 200); // aspect ratio of smileSvg
+          const smileX = mX - smileW / 2;
+          const smileY = mY - smileH * 0.38;
 
-          ctx.beginPath();
-          ctx.arc(mX, mY - mH * 0.4, mW * 0.9, 0.1 * Math.PI, 0.9 * Math.PI);
-          ctx.stroke();
-
-          ctx.fillStyle = '#FF4136';
-          ctx.beginPath();
-          ctx.arc(mX - mW * 0.9 * Math.cos(0.1 * Math.PI), mY - mH * 0.4 + mW * 0.9 * Math.sin(0.1 * Math.PI), ctx.lineWidth * 0.8, 0, 2 * Math.PI);
-          ctx.arc(mX + mW * 0.9 * Math.cos(0.1 * Math.PI), mY - mH * 0.4 + mW * 0.9 * Math.sin(0.1 * Math.PI), ctx.lineWidth * 0.8, 0, 2 * Math.PI);
-          ctx.fill();
+          ctx.drawImage(smileImg, smileX, smileY, smileW, smileH);
         }
 
-        // 4. Colorful Blue Star Makeup around Eyes
-        const drawEyeStar = (eyeX: number, eyeY: number, size: number) => {
-          ctx.fillStyle = '#0074D9';
-          ctx.beginPath();
-          ctx.moveTo(eyeX, eyeY - size);
-          ctx.lineTo(eyeX + size * 0.4, eyeY);
-          ctx.lineTo(eyeX, eyeY + size);
-          ctx.lineTo(eyeX - size * 0.4, eyeY);
-          ctx.closePath();
-          ctx.fill();
-          
-          ctx.fillStyle = '#FFFFFF';
-          ctx.beginPath();
-          ctx.arc(eyeX, eyeY, size * 0.25, 0, 2 * Math.PI);
-          ctx.fill();
-        };
-
+        // 4. Draw Eyes (Blue Star Makeup)
         const faceW = coords.face ? (coords.face.width / 100) * w : w * 0.3;
-        const eyeStarSize = faceW * 0.12;
+        const eyeSize = faceW * 0.22;
 
         if (coords.left_eye) {
-          drawEyeStar(getX(coords.left_eye.x), getY(coords.left_eye.y), eyeStarSize);
+          const eX = getX(coords.left_eye.x) - eyeSize / 2;
+          const eY = getY(coords.left_eye.y) - eyeSize / 2;
+          ctx.drawImage(starImg, eX, eY, eyeSize, eyeSize);
         }
         if (coords.right_eye) {
-          drawEyeStar(getX(coords.right_eye.x), getY(coords.right_eye.y), eyeStarSize);
+          const eX = getX(coords.right_eye.x) - eyeSize / 2;
+          const eY = getY(coords.right_eye.y) - eyeSize / 2;
+          ctx.drawImage(starImg, eX, eY, eyeSize, eyeSize);
         }
 
-        // 5. Classic Red Bulbous Nose
+        // 5. Draw Nose (3D Glossy Nose)
         if (coords.nose) {
           const nX = getX(coords.nose.x);
           const nY = getY(coords.nose.y);
           const nW = (coords.nose.width / 100) * w;
           const nH = (coords.nose.height / 100) * h;
-          const noseRadius = Math.max(nW, nH) * 1.1;
+          const noseSize = Math.max(nW, nH) * 2.1;
 
-          ctx.fillStyle = '#FF4136';
-          ctx.beginPath();
-          ctx.arc(nX, nY, noseRadius, 0, 2 * Math.PI);
-          ctx.fill();
+          const noseX = nX - noseSize / 2;
+          const noseY = nY - noseSize / 2;
 
-          ctx.fillStyle = '#FFFFFF';
-          ctx.globalAlpha = 0.75;
-          ctx.beginPath();
-          ctx.arc(nX - noseRadius * 0.35, nY - noseRadius * 0.35, noseRadius * 0.28, 0, 2 * Math.PI);
-          ctx.fill();
-          ctx.globalAlpha = 1.0;
+          ctx.drawImage(noseImg, noseX, noseY, noseSize, noseSize);
         }
         
         resolve(canvas.toDataURL('image/jpeg', 0.95));
