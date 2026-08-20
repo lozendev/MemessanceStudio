@@ -7,9 +7,9 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bhkdfjheduelhkgvgoqu.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_ewWj7jOcnyO-RCfNAP2MGQ_uDYdoQSN';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Connected to Supabase Project: bhkdfjheduelhkgvgoqu
 
