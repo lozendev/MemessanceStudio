@@ -17,6 +17,155 @@ const FlowyChar = ({ char }: { char: string }) => (
   <span className="font-vibes text-amber-300/90 text-[1.4em] leading-none inline-block align-baseline hover:scale-110 transition-transform duration-300 transform -translate-y-1">{char}</span>
 );
 
+const applyClownFilterHelper = (base64Image: string, coords: any): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(img.src);
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0);
+        
+        const w = canvas.width;
+        const h = canvas.height;
+        const getX = (val: number) => (val / 100) * w;
+        const getY = (val: number) => (val / 100) * h;
+        
+        // 1. Draw Wig (Rainbow Afro) on top of the head
+        if (coords.face) {
+          const faceX = getX(coords.face.x);
+          const faceY = getY(coords.face.y);
+          const faceW = (coords.face.width / 100) * w;
+          const faceH = (coords.face.height / 100) * h;
+          const faceSize = Math.max(faceW, faceH);
+
+          const colors = ['#FF4136', '#FF851B', '#FFDC00', '#2ECC40', '#0074D9', '#B10DC9'];
+          ctx.globalAlpha = 0.85;
+          const wigRadius = faceSize * 0.35;
+          const numCircles = 12;
+          for (let i = 0; i < numCircles; i++) {
+            const angle = (i / numCircles) * Math.PI - Math.PI; // Arch over the head
+            const offsetDist = faceSize * 0.55;
+            const cx = faceX + Math.cos(angle) * offsetDist;
+            const cy = faceY - faceH * 0.35 + Math.sin(angle) * offsetDist * 0.7;
+            
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.beginPath();
+            ctx.arc(cx, cy, wigRadius, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1.0;
+        }
+
+        // 2. Rosy Cheeks
+        if (coords.nose) {
+          const noseX = getX(coords.nose.x);
+          const noseY = getY(coords.nose.y);
+          const faceW = coords.face ? (coords.face.width / 100) * w : w * 0.3;
+          const cheekOffset = faceW * 0.25;
+          const cheekR = faceW * 0.1;
+
+          ctx.globalAlpha = 0.45;
+          ctx.fillStyle = '#FF4136';
+          
+          ctx.beginPath();
+          ctx.arc(noseX - cheekOffset, noseY + cheekR * 0.3, cheekR, 0, 2 * Math.PI);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(noseX + cheekOffset, noseY + cheekR * 0.3, cheekR, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+
+        // 3. Exaggerated Red Clown Smile
+        if (coords.mouth) {
+          const mX = getX(coords.mouth.x);
+          const mY = getY(coords.mouth.y);
+          const mW = (coords.mouth.width / 100) * w;
+          const mH = (coords.mouth.height / 100) * h;
+
+          ctx.strokeStyle = '#FF4136';
+          ctx.lineWidth = Math.max(5, mW * 0.15);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          ctx.beginPath();
+          ctx.arc(mX, mY - mH * 0.4, mW * 0.9, 0.1 * Math.PI, 0.9 * Math.PI);
+          ctx.stroke();
+
+          ctx.fillStyle = '#FF4136';
+          ctx.beginPath();
+          ctx.arc(mX - mW * 0.9 * Math.cos(0.1 * Math.PI), mY - mH * 0.4 + mW * 0.9 * Math.sin(0.1 * Math.PI), ctx.lineWidth * 0.8, 0, 2 * Math.PI);
+          ctx.arc(mX + mW * 0.9 * Math.cos(0.1 * Math.PI), mY - mH * 0.4 + mW * 0.9 * Math.sin(0.1 * Math.PI), ctx.lineWidth * 0.8, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+
+        // 4. Colorful Blue Star Makeup around Eyes
+        const drawEyeStar = (eyeX: number, eyeY: number, size: number) => {
+          ctx.fillStyle = '#0074D9';
+          ctx.beginPath();
+          ctx.moveTo(eyeX, eyeY - size);
+          ctx.lineTo(eyeX + size * 0.4, eyeY);
+          ctx.lineTo(eyeX, eyeY + size);
+          ctx.lineTo(eyeX - size * 0.4, eyeY);
+          ctx.closePath();
+          ctx.fill();
+          
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(eyeX, eyeY, size * 0.25, 0, 2 * Math.PI);
+          ctx.fill();
+        };
+
+        const faceW = coords.face ? (coords.face.width / 100) * w : w * 0.3;
+        const eyeStarSize = faceW * 0.12;
+
+        if (coords.left_eye) {
+          drawEyeStar(getX(coords.left_eye.x), getY(coords.left_eye.y), eyeStarSize);
+        }
+        if (coords.right_eye) {
+          drawEyeStar(getX(coords.right_eye.x), getY(coords.right_eye.y), eyeStarSize);
+        }
+
+        // 5. Classic Red Bulbous Nose
+        if (coords.nose) {
+          const nX = getX(coords.nose.x);
+          const nY = getY(coords.nose.y);
+          const nW = (coords.nose.width / 100) * w;
+          const nH = (coords.nose.height / 100) * h;
+          const noseRadius = Math.max(nW, nH) * 1.1;
+
+          ctx.fillStyle = '#FF4136';
+          ctx.beginPath();
+          ctx.arc(nX, nY, noseRadius, 0, 2 * Math.PI);
+          ctx.fill();
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.globalAlpha = 0.75;
+          ctx.beginPath();
+          ctx.arc(nX - noseRadius * 0.35, nY - noseRadius * 0.35, noseRadius * 0.28, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+        
+        resolve(canvas.toDataURL('image/jpeg', 0.95));
+      } catch (ex) {
+        reject(ex);
+      }
+    };
+    img.onerror = (err) => reject(err);
+    img.src = base64Image;
+  });
+};
+
 export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -64,12 +213,10 @@ export default function App() {
                   return reject(new Error("Canvas context failed"));
               }
               
-              // Fill background with white in case of transparent pngs
               ctx.fillStyle = "#FFFFFF";
               ctx.fillRect(0, 0, width, height);
               ctx.drawImage(img, 0, 0, width, height);
               
-              // Export as JPEG with 0.7 compression quality
               const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
               resolve(dataUrl);
             };
@@ -95,8 +242,9 @@ export default function App() {
             throw error;
           }
           
-          if (data && data.url) {
-            setUploadedImage(data.url);
+          if (data && data.coordinates) {
+            const clownedImg = await applyClownFilterHelper(base64, data.coordinates);
+            setUploadedImage(clownedImg);
             setGenerateState('done');
           } else {
             throw new Error(data?.error || "Image generation returned no results");
@@ -104,11 +252,25 @@ export default function App() {
         } catch (err: any) {
           console.error("Masterpiece Generation Failed:", err);
           alert(`The Master encountered an error: ${err.message || err.toString()}`);
-          setGenerateState('idle'); // Send back to idle so they can try again
+          setGenerateState('idle'); 
         }
       } else {
-        // Mock generation delay if no Supabase backend configured
-        setTimeout(() => {
+        // Mock generation delay with default mock coordinates
+        setTimeout(async () => {
+          const mockCoords = {
+            face: { x: 50, y: 50, width: 30, height: 40 },
+            nose: { x: 50, y: 48, width: 8, height: 8 },
+            left_eye: { x: 42, y: 40 },
+            right_eye: { x: 58, y: 40 },
+            mouth: { x: 50, y: 62, width: 14, height: 8 }
+          };
+          // Try to generate a preview using the object URL (requires loading)
+          try {
+            const clowned = await applyClownFilterHelper(imgUrl, mockCoords);
+            setUploadedImage(clowned);
+          } catch (e) {
+            console.error("Mock filter failed:", e);
+          }
           setGenerateState('done');
         }, 3000);
       }
